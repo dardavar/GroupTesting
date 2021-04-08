@@ -16,7 +16,14 @@ class TheWorld:
         self.population = []
 
         for id_num in range(0,POPULATION_SIZE):
-            person = {"id": id_num, "sick": False, "cured": False, "in hospital": False, "in quarantine": False, "test dates": []}
+            person = {"id"                : id_num, 
+                      "sick"              : False, 
+                      "cured"             : False, 
+                      "in hospital"       : False, 
+                      "in quarantine"     : False,
+                      "out of quarantine" : False, 
+                      "test dates"        : []
+                      }
             if id_num < 3:
                 person["related"] = list(range(id_num+1, id_num+4))
                 person["related"].append((id_num - 1) % POPULATION_SIZE)
@@ -44,6 +51,9 @@ class TheWorld:
     def GetQuarantined(self):
         return list(filter(lambda x: x["in quarantine"], self.population))
 
+    def GetOutOfQuarantine(self):
+        return list(filter(lambda x: x["out of quarantine"], self.population))
+
     def GetNotQuarantined(self):
         return list(filter(lambda x: x["sick"] and not x["in quarantine"], self.population))
 
@@ -56,6 +66,8 @@ class TheWorld:
     def GetTestDates(self):
         return list(map(lambda x: x["test dates"], self.population))
     
+    #Get number of peapole to infect and list of potential sicks,
+    #chose sicks randomly and infect them
     def AddNewSicks(self, numOfInfected, potential_sicks):
         infectedIndex = rand.sample(potential_sicks, numOfInfected)
         
@@ -67,6 +79,7 @@ class TheWorld:
             self.population[index]["days of sickness"] = 0
             self.population[index]["sick"] = True
 
+    #Update the days of sickness and remove the cured, if needed
     def RemoveCured(self):
         sicks = self.GetSicks()
 
@@ -79,6 +92,7 @@ class TheWorld:
                 self.population[sick_id]["cured"] = True
                 self.population[sick_id]["in hospital"] = False
 
+    #Creates a set of all the potential infected - related and randoms, and call AddNEwSicks()
     def Infect(self):
         sicks = self.GetSicks()
         potential_sicks = []
@@ -93,6 +107,7 @@ class TheWorld:
         
         self.AddNewSicks(num_of_new_sicks, potential_sicks)
     
+    #Every sick who's sick for DAYS_TO_HOSPITAL days get into hospital w.p. SEVERE_SICK_PROB
     def Hospitalize(self):
         not_quarantined = self.GetNotQuarantined()
         for person in not_quarantined:
