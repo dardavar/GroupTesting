@@ -8,7 +8,6 @@ AVG_SICK_DAYS     = 10
 DAYS_TO_HOSPITAL  = 7
 SEVERE_SICK_PROB  = 0.1
 EXPECTED_INFECTED = 1.2
-INFECT_PROB       = EXPECTED_INFECTED/POPULATION_SIZE
 
 class TheWorld:
 
@@ -66,8 +65,8 @@ class TheWorld:
     def GetTestDates(self):
         return list(map(lambda x: x["test dates"], self.population))
     
-    #Get number of peapole to infect and list of potential sicks,
-    #chose sicks randomly and infect them
+    # Get number of peapole to infect and list of potential sicks,
+    # choםse sicks randomly and infect them
     def AddNewSicks(self, numOfInfected, potential_sicks):
         infectedIndex = rand.sample(potential_sicks, numOfInfected)
         
@@ -79,7 +78,7 @@ class TheWorld:
             self.population[index]["days of sickness"] = 0
             self.population[index]["sick"] = True
 
-    #Update the days of sickness and remove the cured, if needed
+    # Update the days of sickness and remove the cured, if needed
     def RemoveCured(self):
         sicks = self.GetSicks()
 
@@ -92,13 +91,14 @@ class TheWorld:
                 self.population[sick_id]["cured"] = True
                 self.population[sick_id]["in hospital"] = False
 
-    #Creates a set of all the potential infected - related and randoms, and call AddNEwSicks()
+    # Creates a set of all the potential infected - related and randoms, and call AddNEwSicks()
     def Infect(self):
-        sicks = self.GetSicks()
+        sicks = self.GetNotQuarantined()
         potential_sicks = []
 
         for sick in sicks:
             potential_sicks.extend(sick["related"]) 
+        
         potential_sicks.extend(rand.sample(range(POPULATION_SIZE), len(sicks)))
         potential_sicks = set(potential_sicks)
         potential_sicks = list(potential_sicks & set(map(lambda x: x["id"], self.GetNotYetSicks())))
@@ -107,7 +107,7 @@ class TheWorld:
         
         self.AddNewSicks(num_of_new_sicks, potential_sicks)
     
-    #Every sick who's sick for DAYS_TO_HOSPITAL days get into hospital w.p. SEVERE_SICK_PROB
+    # Every sick who's sick for DAYS_TO_HOSPITAL days get into hospital w.p. SEVERE_SICK_PROB
     def Hospitalize(self):
         not_quarantined = self.GetNotQuarantined()
         for person in not_quarantined:
