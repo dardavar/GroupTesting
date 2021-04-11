@@ -19,10 +19,10 @@ class WorldSimulator:
         self.daily_cost = []
         self.world = TheWorld()
     
-    #Get list of ID's lists and return the results:
-    #0 - No sicks
-    #1 - At least a single sick
-    #2 - If someone's test splitted into more than MAX_TUBES_PER_TEST
+    # Get list of ID's lists and return the results:
+    # 0 - No sicks
+    # 1 - At least a single sick
+    # 2 - If someone's test splitted into more than MAX_TUBES_PER_TEST
     def CheckTubes(self, tubes, day):
         results = []
         tubes_per_id = {}
@@ -43,15 +43,15 @@ class WorldSimulator:
             results.append(result)
         return results
     
-    #Get ID's and send them to quarantine
+    # Get ID's and send them to quarantine
     def SendToQuarantine(self, ids_list):
         for person_id in ids_list:
             self.world.population[person_id]["in quarantine"] = True
             self.world.population[person_id]["days in quarantine"] = 0
     
-    #Detract people from quarantine
-    #Person is get out of quarantine if either he cured
-    #or if 4 days of quarantine have passed, the latest.
+    # Detract people from quarantine
+    # Person is get out of quarantine if either he cured
+    # or if 4 days of quarantine have passed, the latest.
     def RemoveFromQuarantine(self):
         quarantined = self.world.GetQuarantined()
         for person in quarantined:
@@ -61,6 +61,8 @@ class WorldSimulator:
             if (days_in_quarantine > MIN_DAYS_IN_QUARANTINE) and (person["cured"] or not person["sick"]):
                 self.world.population[person_id]["in quarantine"] = False
                 self.world.population[person_id]["out of quarantine"] = True
+            else:
+                self.world.population[person_id]["days in quarantine"] = days_in_quarantine
 
 
     def CalcDailyCost(self, num_of_tubes):
@@ -69,7 +71,7 @@ class WorldSimulator:
         tube_cost = TUBE_COST*num_of_tubes
         self.daily_cost.append(quarantine_cost + hospital_cost + tube_cost)
 
-    def StartNewDay(self, day, tubes = [], to_quarantine_list = [], from_quarantine_list = []):
+    def StartNewDay(self, day, tubes = [], to_quarantine_list = []):
         results = self.CheckTubes(tubes, day)
         self.world.Infect()
         self.world.RemoveCured()
@@ -79,7 +81,7 @@ class WorldSimulator:
         self.CalcDailyCost(len(tubes or []))
         return results
 
-    #Return a dictionary depend on the requested verbosity
+    # Return a dictionary depend on the requested verbosity
     # LOW       - Number of: quarantined, out of quarintine and hospitalized 
     # HIGH      - Allowed details of: quarantined, out of quarintine and hospitalized
     # FORBIDDEN - Return full detailes about the pandemic's status 
@@ -124,8 +126,9 @@ if __name__ == '__main__':
     sim = WorldSimulator()
     sick_per_day = [len(sim.world.GetNotQuarantined())]
     total_healed = [0]
-    for day in range(30):
-        sim.StartNewDay(day, to_quarantine_list = [1,2,3])
+    sim.StartNewDay(0, to_quarantine_list = list(range(1000000)))
+    for day in range(29):
+        sim.StartNewDay(day)
         status = sim.GetStatus(LOW)
         status = sim.GetStatus(HIGH)
         status = sim.GetStatus(FORBIDDEN)

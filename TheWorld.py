@@ -2,7 +2,7 @@ from numpy import random
 import random as rand
 import functools
 
-POPULATION_SIZE   = 100000
+POPULATION_SIZE   = 1000000
 INIT_NUM_OF_SICK  = 10
 AVG_SICK_DAYS     = 10
 DAYS_TO_HOSPITAL  = 7
