@@ -16,6 +16,7 @@ FORBIDDEN = 2
 class WorldSimulator:
 
     def __init__(self):
+        self.day = 0
         self.daily_cost = []
         self.world = TheWorld()
     
@@ -23,13 +24,13 @@ class WorldSimulator:
     # 0 - No sicks
     # 1 - At least a single sick
     # 2 - If someone's test splitted into more than MAX_TUBES_PER_TEST
-    def CheckTubes(self, tubes, day):
+    def CheckTubes(self, tubes):
         results = []
         tubes_per_id = {}
         for tube in tubes:
             result = 0
             for person_id in tube:
-                self.world.population[person_id]["test dates"].append(day)
+                self.world.population[person_id]["test dates"].append(self.day)
                 
                 if person_id in tubes_per_id:
                     tubes_per_id[person_id] += 1
@@ -71,8 +72,9 @@ class WorldSimulator:
         tube_cost = TUBE_COST*num_of_tubes
         self.daily_cost.append(quarantine_cost + hospital_cost + tube_cost)
 
-    def StartNewDay(self, day, tubes = [], to_quarantine_list = []):
-        results = self.CheckTubes(tubes, day)
+    def StartNewDay(self, tubes = [], to_quarantine_list = []):
+        self.day += 1
+        results = self.CheckTubes(tubes)
         self.world.Infect()
         self.world.RemoveCured()
         self.world.Hospitalize()
@@ -127,8 +129,8 @@ if __name__ == '__main__':
     sick_per_day = [len(sim.world.GetNotQuarantined())]
     total_healed = [0]
     sim.StartNewDay(0, to_quarantine_list = list(range(1000000)))
-    for day in range(29):
-        sim.StartNewDay(day)
+    for _ in range(29):
+        sim.StartNewDay()
         status = sim.GetStatus(LOW)
         status = sim.GetStatus(HIGH)
         status = sim.GetStatus(FORBIDDEN)
